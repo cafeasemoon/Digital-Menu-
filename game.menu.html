@@ -1,25 +1,5 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-<!--
-===== قوانین Firestore: این متن را کپی کن و در Firebase > Firestore > Rules بچسبان (فقط خود متن، بدون این خط‌ها) =====
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // به‌جای متن زیر، UID حساب مدیر اصلی را بگذار
-    function isAdmin() { return request.auth != null && request.auth.uid == 'PUT_ADMIN_UID_HERE'; }
-    match /shop/{d}  { allow read: if true; allow write: if isAdmin(); }
-    match /games/{d} { allow read: if true; allow write: if isAdmin(); }
-    match /orders/{id} {
-      allow get: if true;
-      allow list, update, delete: if isAdmin();
-      allow create: if request.resource.data.status == 'pending'
-        && request.resource.data.text is string && request.resource.data.text.size() < 3000
-        && request.resource.data.keys().hasOnly(['text','name','phone','console','t','status']);
-    }
-  }
-}
-=====================================================================
--->
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -79,24 +59,20 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
 <div id="bg"><svg preserveAspectRatio="xMidYMid slice"><defs><pattern id="pt" width="300" height="300" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)"><g fill="none" stroke="#8b3dff" stroke-width="2.2" stroke-linejoin="round" opacity=".42"><g transform="translate(20,30)"><path d="M30 20q-18 0-22 30l-6 40q-2 18 14 14l22-20h46l22 20q16 4 14-14l-6-40q-4-30-22-30z"/><path d="M36 48v22M25 59h22"/><circle cx="92" cy="50" r="5"/><circle cx="106" cy="62" r="5"/><circle cx="78" cy="62" r="5"/><circle cx="92" cy="74" r="5"/></g><g transform="translate(170,40)"><rect x="0" y="0" width="110" height="34" rx="9"/><path d="M12 17h40M80 17h18"/><circle cx="68" cy="17" r="4"/></g><g transform="translate(180,150)"><path d="M0 0h40l10 14h50v50H0z"/><circle cx="25" cy="38" r="9"/><path d="M60 30h28M60 44h28"/></g><g transform="translate(20,190)"><path d="M10 20q-10 0-10 12v30q0 12 10 12h30q10 0 10-12V32q0-12-10-12z"/><circle cx="25" cy="47" r="10"/><path d="M60 40h50"/></g></g></pattern></defs><rect width="100%" height="100%" fill="url(#pt)"/></svg></div>
 <div id="app"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
-<script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getFirestore,collection,doc,onSnapshot,setDoc,addDoc,updateDoc,deleteDoc,query,orderBy} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-/* ===== فقط همین بخش را با مقدارهای Firebase خودت عوض کن ===== */
-const FB={apiKey:"PASTE_HERE",authDomain:"PASTE_HERE",projectId:"PASTE_HERE",appId:"PASTE_HERE"};
-/* ================================================================ */
-const db=getFirestore(initializeApp(FB)),au=getAuth();
+<script id="data" type="application/json">{"shop":{"name":"گیم‌نت کسری","open":true,"reopen":"","phone":"09012113920","link":"https://claude.ai/artifact/CrAc87VYgaEBfbetFLf9nS"},"games":[{"id":"a1","n":"EA FC 25","g":"ورزشی","c":["PS4","PS5","Xbox One S","Xbox One X","Xbox Series S","Xbox Series X"],"s":60,"p":150000},{"id":"a2","n":"God of War Ragnarök","g":"اکشن","c":["PS4","PS5"],"s":90,"p":200000},{"id":"a3","n":"Forza Horizon 5","g":"مسابقه‌ای","c":["Xbox One S","Xbox One X","Xbox Series S","Xbox Series X"],"s":110,"p":180000},{"id":"a4","n":"Resident Evil 4","g":"ترسناک","c":["PS4","PS5","Xbox Series S","Xbox Series X"],"s":55,"p":170000},{"id":"a5","n":"Spider-Man 2","g":"ماجراجویی","c":["PS5"],"s":100,"p":220000}]}</script>
+<script>
 const $=s=>document.querySelector(s),A=$('#app');
-let D={shop:{name:'مغازه',open:true,reopen:'',phone:'09012113920'},games:[]},ORD=[];
+const D=JSON.parse($('#data').textContent);
+try{if(location.hash==='#kasra-panel'&&localStorage.draft)Object.assign(D,JSON.parse(localStorage.draft))}catch(x){}
 const CN=['PS4','PS5','Xbox One S','Xbox One X','Xbox Series S','Xbox Series X'],GN=['اکشن','مسابقه‌ای','ورزشی','ماجراجویی','ترسناک'];
 const CP=[[500,'۵۰۰ گیگابایت'],[1000,'۱ ترابایت'],[2000,'۲ ترابایت']];
+const PASS='kasra developer 1355678896';
 const TM=['ممنون که ما رو برای سرگرمی‌ات انتخاب کردی، خیلی خوشحالیم 💜','امیدواریم این بازی‌ها پر از لحظه‌های ناب و خنده برات بسازن.','دلت همیشه شاد و دستت همیشه روی دسته‌ی برنده باشه 🎮','سفارشت رسید؛ ما با عشق آماده‌ش می‌کنیم.','امروز یه بازی خوب، بهترین هدیه‌ایه که می‌تونی به خودت بدی.','مرسی که بهمون اعتماد کردی، قول می‌دیم پشیمون نشی.','آرزو می‌کنیم هر مرحله رو با یه لبخند تموم کنی.','خستگی روز رو با یه بازی قشنگ از تنت بیرون کن، حقته 🌙','تو فقط مشتری نیستی، جزئی از خانواده‌ی گیمرهای ما هستی.','امیدواریم بالاترین امتیازها همیشه مال تو باشه 🏆','لحظه‌های بازیت پر از هیجان و تموم‌نشدنی باشه.','یه دنیا ممنون! حضورت بهمون انرژی می‌ده ✨','هر بازی یه ماجراست؛ امیدواریم ماجراهای قشنگی پیش رو داشته باشی.','امشب بهترین شب بازی عمرت باشه 🎮','ممنون از وقتی که گذاشتی و انتخاب کردی.','زندگی هم مثل بازیه؛ امیدوارم همیشه از مرحله‌های سخت رد بشی و برنده باشی 💪','با هر بار بازی کردن، یه لبخند بیشتر نصیبت بشه.','خوشحالیم که بخشی از سرگرمی‌های تو هستیم.','امیدواریم هیچ‌وقت ذخیره‌ی بازیت پاک نشه و هیچ‌وقت لگ نکنی 😄','به‌خاطر انتخابت ازت قدردانیم.','این سفارش رو با دقت و دوست‌داشتن آماده می‌کنیم.','دلمون می‌خواد هر لحظه‌ی بازیت پر از شادی و رفاقت باشه.','امیدواریم کنار دوستان و خانواده‌ت کلی خوش بگذره.','آرزومندیم روزهات پر از خبرهای خوب و بردهای بزرگ باشه 🌟','تو باعث شدی روز ما قشنگ‌تر بشه، ممنون 💜','هر چی دلت می‌خواد همین‌جا منتظرته؛ هر وقت خواستی برگرد.','قهرمان واقعی کسیه که از بازی لذت می‌بره؛ لذتش مال تو!','امیدواریم همیشه سلامت، شاد و پرانرژی باشی.','مرسی که با ما بودی؛ منتظر دیدار دوباره‌ت هستیم 🎮','بازی خوش، دل خوش، روزگار خوش؛ به امید دیدار 💜'];
 const fa=n=>(+n||0).toLocaleString('fa-IR',{maximumFractionDigits:1});
 const e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const dg=s=>String(s).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 let C={step:0,sel:[],g:'همه',q:'',name:'',phone:''},ADM=false,OUT='',SENT=false,U=()=>{};
-try{C={...C,...JSON.parse(sessionStorage.c||'{}')}}catch{}
+try{C={...C,...JSON.parse(sessionStorage.c||'{}')};ADM=sessionStorage.adm==='1'}catch{}
 const sv=()=>{try{sessionStorage.c=JSON.stringify(C)}catch{}};
 const gm=()=>D.games.filter(g=>C.sel.includes(g.id)&&g.a!==false);
 const usable=()=>C.cap*.85;
@@ -112,8 +88,8 @@ function render(){
   else if(C.step==2)h+=`<div class="box"><h2>حافظه کنسول ${e(C.console)} چقدره؟ 💾</h2><div class="opts">${CP.map(c=>`<button onclick="pk('cap',${c[0]},3)">${c[1]}</button>`).join('')}</div><button class="g full" onclick="C.step=1;render()">→ بازگشت</button></div>`;
   else if(C.step==3){
     h+=`<div class="box"><div class="mut">${e(C.name)} | ${e(C.console)} | حافظه ${fa(C.cap)} گیگ (قابل‌استفاده تقریبی: ${fa(usable())} گیگ) <a href="#" onclick="C.step=1;C.sel=[];render();return false" style="color:var(--p2)">تغییر</a></div><input id="q" placeholder="🔍 جست‌وجوی بازی..." value="${e(C.q)}" style="margin-top:10px"><div class="chips">${['همه',...GN].map(g=>`<button class="chip ${C.g==g?'a':''}" onclick="C.g='${g}';sv();render()">${g}</button>`).join('')}</div></div><div id="lst"></div><div id="bar"></div>`;
-  }else if(C.step==4)h+=`<div class="box"><h2>${SENT?'✅ سفارش شما برای مغازه ارسال شد':'📋 سفارش شما آماده است'}</h2><div id="stt" class="mut" style="margin-bottom:8px"></div><pre>${e(OUT)}</pre>${sm()}${wa()}<button class="g full" onclick="C.step=3;C.sel=[];sv();render()">سفارش جدید</button></div>`;
-  A.innerHTML=h;if(C.step==4&&C.oid)wo();
+  }else if(C.step==4)h+=`<div class="box"><h2>📋 سفارش شما آماده است</h2><pre>${e(OUT)}</pre><p class="mut">سفارش وقتی ثبت می‌شود که یکی از دکمه‌های زیر را بزنی و پیام را ارسال کنی.</p>${sm()}${wa()}<button class="g full" onclick="C.step=3;C.sel=[];sv();render()">سفارش جدید</button></div>`;
+  A.innerHTML=h;
   if(C.step==3&&D.shop.open){drawList();drawBar();$('#q').oninput=x=>{C.q=x.target.value;sv();drawList()}}
 }
 function wa(){let p=dg(D.shop.phone||'').replace(/\D/g,'');if(!p)return'';p=p.replace(/^0/,'98');return `<a class="btn" onclick="arm()" target="_blank" rel="noopener" href="https://wa.me/${p}?text=${encodeURIComponent(OUT)}">ارسال با واتساپ</a>`}
@@ -126,7 +102,7 @@ function pk(k,v,s){C[k]=v;C.step=s;sv();render()}
 function drawList(){
   const q=C.q.trim().toLowerCase();
   const L=D.games.filter(g=>g.c.includes(C.console)&&(C.g=='همه'||g.g==C.g)&&g.n.toLowerCase().includes(q));
-  $('#lst').innerHTML=L.length?L.map(g=>`<label class="card ${g.a===false?'un':C.sel.includes(g.id)?'sel':''}" style="margin:0 0 8px;color:var(--tx);font-size:1rem"><input type="checkbox" ${g.a===false?'disabled':C.sel.includes(g.id)?'checked':''} onchange="tg('${g.id}',this)"><span class="i"><b>${e(g.n)}</b><small>${e(g.g)} • 💾 ${fa(g.s)} گیگ</small></span>${g.a===false?'<span class="pr" style="color:var(--bad)">ناموجود</span>':`<span class="pr">${fa(g.p)} تومان</span>`}</label>`).join(''):'<div class="box mut">بازی‌ای پیدا نشد (یا هنوز بازی‌ای اضافه نشده).</div>'}
+  $('#lst').innerHTML=L.length?L.map(g=>`<label class="card ${g.a===false?'un':C.sel.includes(g.id)?'sel':''}" style="margin:0 0 8px;color:var(--tx);font-size:1rem"><input type="checkbox" ${g.a===false?'disabled':C.sel.includes(g.id)?'checked':''} onchange="tg('${g.id}',this)"><span class="i"><b>${e(g.n)}</b><small>${e(g.g)} • 💾 ${fa(g.s)} گیگ</small></span>${g.a===false?'<span class="pr" style="color:var(--bad)">ناموجود</span>':`<span class="pr">${fa(g.p)} تومان</span>`}</label>`).join(''):'<div class="box mut">بازی‌ای پیدا نشد.</div>'}
 function tg(id,el){const i=C.sel.indexOf(id);i<0?C.sel.push(id):C.sel.splice(i,1);el.closest('.card').classList.toggle('sel',el.checked);sv();drawBar()}
 function drawBar(){
   const S=gm(),pr=S.reduce((a,g)=>a+g.p,0),sz=S.reduce((a,g)=>a+g.s,0),u=usable(),over=sz>u;
@@ -135,53 +111,39 @@ async function send(){
   const S=gm(),pr=S.reduce((a,g)=>a+g.p,0),sz=S.reduce((a,g)=>a+g.s,0),cp=CP.find(c=>c[0]==C.cap)[1];
   OUT=`📋 سفارش جدید\n👤 نام: ${C.name}\n📞 تلفن: ${C.phone}\n🎮 کنسول: ${C.console} (${cp})\n\n🕹️ بازی‌ها:\n${S.map(g=>`• ${g.n} — ${fa(g.s)} گیگ — ${fa(g.p)} تومان`).join('\n')}\n\n💾 حجم تقریبی: ${fa(sz)} گیگابایت\n💰 جمع کل: ${fa(pr)} تومان`;
   SENT=false;
-  try{const r=await addDoc(collection(db,'orders'),{text:OUT,name:C.name,phone:C.phone,console:C.console,t:Date.now(),status:'pending'});C.oid=r.id;SENT=true}catch(x){}
+  
   C.step=4;C.out=OUT;C.msg=TM[Math.random()*TM.length|0];C.due=0;sv();render()}
 
+/* ---------- admin ---------- */
+function ap(){if(sessionStorage.adm==='1'){ADM=true;return render()}
+  A.innerHTML=head()+`<div class="box"><h2>🔐 ورود به پنل مدیریت</h2><label>رمز</label><input id="pw" type="password" placeholder="رمز را وارد کن"><div id="er" class="warn"></div><button class="full" onclick="lg()">ورود</button><button class="g full" onclick="location.hash='';render()">بازگشت</button></div>`}
+function lg(){if($('#pw').value.trim()===PASS){ADM=true;try{sessionStorage.adm='1'}catch(x){}render()}else $('#er').textContent='رمز اشتباه است'}
+function sd(){try{localStorage.draft=JSON.stringify(D)}catch(x){}render()}
+function col(){if($('#sn'))D.shop={name:$('#sn').value.trim()||'مغازه',open:$('#so').checked,reopen:$('#sr').value.trim(),phone:$('#sp').value.trim()}}
+function admin(){
+  const s=D.shop,dr=!!localStorage.draft;
+  A.innerHTML=`<header><h1>⚙️ پنل مدیریت</h1><button class="g" onclick="ADM=false;try{sessionStorage.adm='0'}catch(x){};location.hash='';render()">خروج</button></header>
+  <div class="box ${dr?'ban':''}"><h2>💾 اعمال تغییرات روی سایت</h2><p class="mut">تغییرات پنل فقط روی همین گوشی ذخیره می‌شوند. برای اینکه مشتری‌ها ببینند: دکمه‌ی زیر را بزن، فایل <b>index.html</b> دانلود می‌شود، آن را در گیت‌هاب جایگزین فایل قبلی کن (Add file ← Upload files).</p><button class="full" onclick="dlf()">دانلود فایل به‌روز (index.html)</button>${dr?'<button class="g full" onclick="if(confirm(\'همه‌ی تغییرات اعمال‌نشده پاک شود؟\')){localStorage.removeItem(\'draft\');location.reload()}">برگرداندن به نسخه‌ی فایل</button>':''}</div>
+  <div class="box"><h2>🏪 مغازه</h2><label>اسم مغازه</label><input id="sn" value="${e(s.name)}"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="so" ${s.open?'checked':''}> مغازه الان باز است</label><label>زمان بازگشایی (وقتی بسته است)</label><input id="sr" value="${e(s.reopen)}" placeholder="مثلاً امروز ساعت ۱۶"><label>شماره مغازه (سفارش‌ها به این شماره پیامک می‌شود)</label><input id="sp" type="tel" value="${e(s.phone)}"><button class="full" onclick="col();sd()">ذخیره</button></div>
+  <div class="box"><h2>➕ افزودن بازی</h2><label>اسم بازی</label><input id="gn"><label>ژانر</label><select id="gg">${GN.map(g=>`<option>${g}</option>`).join('')}</select><label>کنسول‌ها</label><div class="cs">${CN.map(c=>`<label><input type="checkbox" class="gc" value="${c}"> ${c}</label>`).join('')}</div><label>حجم (گیگابایت)</label><input id="gs" type="number" inputmode="decimal"><label>قیمت (تومان)</label><input id="gp" type="number" inputmode="numeric"><div id="er" class="warn"></div><button class="full" onclick="add()">افزودن بازی</button></div>
+  <div class="box"><h2>🕹️ بازی‌ها (${fa(D.games.length)})</h2>${D.games.map(g=>`<div class="card" style="cursor:default;flex-wrap:wrap"><span class="i"><b>${e(g.n)}</b><small>${e(g.g)} • ${g.c.join('، ')} • ${fa(g.s)} گیگ • ${fa(g.p)} تومان</small></span><button class="${g.a===false?'d':'g'}" onclick="av('${g.id}')">${g.a===false?'ناموجود':'موجود'}</button><button class="g" onclick="ep('${g.id}')">قیمت</button><button class="d" onclick="del('${g.id}')">حذف</button></div>`).join('')||'<p class="mut">هنوز بازی‌ای نیست</p>'}</div>
+  <div class="box"><h2>📱 QR کد منوی مشتری</h2><div id="qr" style="background:#fff;padding:10px;border-radius:12px;width:fit-content;margin:8px auto"></div><label>لینک منو (به مشتری بده)</label><input id="sl" readonly value="${location.origin+location.pathname}" onclick="this.select()"><button class="g full" onclick="dlq()">دانلود QR کد</button></div>`;
+  try{const q=qrcode(0,'M');q.addData(location.origin+location.pathname);q.make();$('#qr').innerHTML=q.createSvgTag(6,0)}catch(x){}}
+function add(){const n=$('#gn').value.trim(),c=[...document.querySelectorAll('.gc:checked')].map(x=>x.value),s=parseFloat($('#gs').value),p=parseInt($('#gp').value);
+  if(!n||!c.length||!(s>0)||isNaN(p)||p<0)return $('#er').textContent='اسم، کنسول، حجم و قیمت را کامل پر کن';
+  col();D.games.push({id:'g'+Date.now().toString(36),n,g:$('#gg').value,c,s,p,a:true});sd()}
+function del(id){if(confirm('این بازی حذف شود؟')){col();D.games=D.games.filter(g=>g.id!=id);sd()}}
+function av(id){col();const g=D.games.find(x=>x.id==id);g.a=g.a===false;sd()}
+function ep(id){const g=D.games.find(x=>x.id==id),p=parseInt(dg(prompt('قیمت جدید (تومان)',g.p)||''));if(!isNaN(p)&&p>=0){col();g.p=p;sd()}}
+function dl(b,n,t){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([b],{type:t}));a.download=n;a.click()}
+function dlq(){const v=$('#qr svg');if(!v)return;const x=v.cloneNode(true);x.setAttribute('xmlns','http://www.w3.org/2000/svg');dl(x.outerHTML,'menu-qr.svg','image/svg+xml')}
+function dlf(){col();const c=document.documentElement.cloneNode(true);c.querySelector('#app').innerHTML='';const t=c.querySelector('#thx');t&&t.remove();c.querySelector('#data').textContent=JSON.stringify(D).replace(/</g,'\\u003c');dl('<!DOCTYPE html>\n'+c.outerHTML,'index.html','text/html')}
 function arm(){if(C.due)return;C.due=Date.now()+5000;sv();setTimeout(thx,5000)}
 function thx(){if(C.step!=4||!C.due||Date.now()<C.due-300||$('#thx'))return;const d=document.createElement('div');d.id='thx';d.style.cssText='position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;background:rgba(5,3,10,.97);overflow:auto';d.innerHTML=`<div style="font-size:3.4rem">💜</div><h2 style="color:var(--p2);font-size:1.5rem;text-shadow:0 0 18px var(--p)">ممنون ${e(C.name)} عزیز!</h2><p style="font-size:1.15rem;line-height:2;max-width:420px">${e(C.msg)}</p><button class="g" style="margin-top:18px" onclick="done()">سفارش جدید 🎮</button>`;document.body.appendChild(d)}
 function done(){C.step=3;C.sel=[];C.due=0;sv();const t=$('#thx');t&&t.remove();render()}
 document.addEventListener('visibilitychange',()=>{document.visibilityState==='visible'&&thx()});
-
-/* ---------- Firebase ---------- */
-function wo(){U();U=onSnapshot(doc(db,'orders',C.oid),s=>{const t=s.data()?.status,el=$('#stt');if(el)el.innerHTML=t=='accepted'?'<b style="color:var(--ok)">✅ مغازه سفارش شما را قبول کرد</b>':t=='rejected'?'<b style="color:var(--bad)">❌ مغازه سفارش را رد کرد؛ با مغازه تماس بگیرید</b>':'⏳ در انتظار تأیید مغازه...'},()=>{})}
-const R=()=>{const f=document.activeElement;if(ADM){if(f&&/INPUT|SELECT/.test(f.tagName))return;return render()}
- if(C.step==3&&D.shop.open&&$('#lst')){drawList();drawBar();return}
- if(f&&/INPUT/.test(f.tagName))return;render()};
-onSnapshot(doc(db,'shop','main'),s=>{if(s.exists())D.shop={...D.shop,...s.data()};R()},()=>{});
-onSnapshot(collection(db,'games'),s=>{D.games=s.docs.map(x=>({id:x.id,...x.data()})).sort((a,b)=>(a.n||'').localeCompare(b.n||''));R()},()=>{});
-let AU=null,UO=()=>{};
-onAuthStateChanged(au,u=>{AU=u;UO();UO=()=>{};ORD=[];
- if(u)UO=onSnapshot(query(collection(db,'orders'),orderBy('t','desc')),s=>{ORD=s.docs.map(x=>({id:x.id,...x.data()}));ords()},()=>{ORD=null;ords()});render()});
-const E=p=>p.catch(x=>alert(x.code=='permission-denied'?'اجازه‌ی این کار را ندارید (فقط حساب مدیر اصلی)':'خطا: '+x.message));
-const ST={pending:'⏳ در انتظار',accepted:'✅ قبول شد',rejected:'❌ رد شد'};
-function ords(){const o=$('#ord');if(!o)return;o.innerHTML=ORD===null?'دسترسی ندارید؛ با حساب مدیر اصلی وارد شوید.':ORD.length?ORD.map(x=>`<div style="margin-bottom:14px"><b>${ST[x.status]||ST.pending}</b><pre>${e(x.text)}</pre><button onclick="so('${x.id}','accepted')">قبول</button> <button class="g" onclick="so('${x.id}','rejected')">رد</button> <button class="d" onclick="dlo('${x.id}')">حذف</button></div>`).join(''):'هنوز سفارشی نرسیده.'}
-function admin(){
- if(!AU){A.innerHTML=head()+`<div class="box"><h2>🔐 ورود مدیر</h2><label>ایمیل</label><input id="em" type="email" dir="ltr"><label>رمز</label><input id="pw" type="password" dir="ltr"><div id="er" class="warn"></div><button class="full" onclick="lg()">ورود</button></div>`;return}
- const s=D.shop;
- A.innerHTML=`<header><h1>⚙️ پنل مدیریت</h1><button class="g" onclick="lo()">خروج</button></header>
- <div class="box"><h2>📬 سفارش‌ها</h2><div id="ord" class="mut">در حال بارگذاری...</div></div>
- <div class="box"><h2>🏪 مغازه</h2><label>اسم مغازه</label><input id="sn" value="${e(s.name)}"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="so" ${s.open?'checked':''}> مغازه الان باز است</label><label>زمان بازگشایی (وقتی بسته است)</label><input id="sr" value="${e(s.reopen)}" placeholder="مثلاً امروز ساعت ۱۶"><label>شماره مغازه (دریافت سفارش با پیامک و واتساپ)</label><input id="sp" type="tel" value="${e(s.phone)}"><button class="full" onclick="sh()">ذخیره</button></div>
- <div class="box"><h2>➕ افزودن بازی</h2><label>اسم بازی</label><input id="gn"><label>ژانر</label><select id="gg">${GN.map(g=>`<option>${g}</option>`).join('')}</select><label>کنسول‌ها</label><div class="cs">${CN.map(c=>`<label><input type="checkbox" class="gc" value="${c}"> ${c}</label>`).join('')}</div><label>حجم (گیگابایت)</label><input id="gs" type="number" inputmode="decimal"><label>قیمت (تومان)</label><input id="gp" type="number" inputmode="numeric"><div id="er" class="warn"></div><button class="full" onclick="add()">افزودن بازی</button></div>
- <div class="box"><h2>🕹️ بازی‌ها (${fa(D.games.length)})</h2>${D.games.map(g=>`<div class="card" style="cursor:default;flex-wrap:wrap"><span class="i"><b>${e(g.n)}</b><small>${e(g.g)} • ${g.c.join('، ')} • ${fa(g.s)} گیگ • ${fa(g.p)} تومان</small></span><button class="${g.a===false?'d':'g'}" onclick="av('${g.id}')">${g.a===false?'ناموجود':'موجود'}</button><button class="g" onclick="ep('${g.id}')">قیمت</button><button class="d" onclick="del('${g.id}')">حذف</button></div>`).join('')||'<p class="mut">هنوز بازی‌ای نیست</p>'}</div>
- <div class="box"><h2>📱 QR کد منوی مشتری</h2><div id="qr" style="background:#fff;padding:10px;border-radius:12px;width:fit-content;margin:8px auto"></div><label>لینک منو (به مشتری بده)</label><input id="sl" readonly value="${location.origin+location.pathname}" onclick="this.select()"><button class="g full" onclick="dlq()">دانلود QR کد</button></div>`;
- ords();const q=qrcode(0,'M');q.addData(location.origin+location.pathname);q.make();$('#qr').innerHTML=q.createSvgTag(6,0)}
-function lg(){signInWithEmailAndPassword(au,$('#em').value.trim(),$('#pw').value).catch(()=>$('#er').textContent='ایمیل یا رمز اشتباه است')}
-function lo(){signOut(au)}
-function sh(){E(setDoc(doc(db,'shop','main'),{name:$('#sn').value.trim()||'مغازه',open:$('#so').checked,reopen:$('#sr').value.trim(),phone:$('#sp').value.trim()})).then(()=>alert('ذخیره شد'))}
-function add(){const n=$('#gn').value.trim(),c=[...document.querySelectorAll('.gc:checked')].map(x=>x.value),s=parseFloat($('#gs').value),p=parseInt($('#gp').value);
- if(!n||!c.length||!(s>0)||isNaN(p)||p<0)return $('#er').textContent='اسم، کنسول، حجم و قیمت را کامل پر کن';
- $('#er').textContent='';E(addDoc(collection(db,'games'),{n,g:$('#gg').value,c,s,p,a:true})).then(()=>{$('#gn').value='';$('#gs').value='';$('#gp').value=''})}
-function del(id){confirm('این بازی حذف شود؟')&&E(deleteDoc(doc(db,'games',id)))}
-function av(id){const g=D.games.find(x=>x.id==id);E(updateDoc(doc(db,'games',id),{a:g.a===false}))}
-function ep(id){const g=D.games.find(x=>x.id==id),p=parseInt(dg(prompt('قیمت جدید (تومان)',g.p)||''));if(!isNaN(p)&&p>=0)E(updateDoc(doc(db,'games',id),{p}))}
-function so(id,status){E(updateDoc(doc(db,'orders',id),{status}))}
-function dlo(id){confirm('این سفارش حذف شود؟')&&E(deleteDoc(doc(db,'orders',id)))}
-function dlq(){const v=$('#qr svg');if(!v)return;const x=v.cloneNode(true);x.setAttribute('xmlns','http://www.w3.org/2000/svg');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([x.outerHTML],{type:'image/svg+xml'}));a.download='menu-qr.svg';a.click()}
-function route(){ADM=location.hash==='#admin';render()}
-addEventListener('hashchange',route);
-Object.assign(window,{C,render,sv,s0,pk,tg,send,done,arm,lg,lo,sh,add,del,av,ep,so,dlo,dlq});
-route();
+function route(){OUT=OUT||C.out||'';C.step==4&&C.due&&setTimeout(thx,Math.max(0,C.due-Date.now()));location.hash==='#kasra-panel'&&!ADM?ap():render()}
+addEventListener('hashchange',route);route();
 </script>
 </body>
 </html>
