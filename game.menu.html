@@ -77,7 +77,7 @@ const sv=()=>{try{sessionStorage.c=JSON.stringify(C)}catch{}};
 const gm=()=>D.games.filter(g=>C.sel.includes(g.id)&&g.a!==false);
 const usable=()=>C.cap*.85;
 
-function head(){const o=D.shop.open;return `<header><h1 onclick="tap()">🎮 ${e(D.shop.name)}</h1><span class="tag ${o?'on':'off'}">${o?'باز است':'بسته است'}</span></header>`}
+function head(){const o=D.shop.open;return `<header><h1>🎮 ${e(D.shop.name)}</h1><span class="tag ${o?'on':'off'}">${o?'باز است':'بسته است'}</span></header>`}
 function render(){
   U();U=()=>{};
   if(ADM)return admin();
@@ -115,7 +115,6 @@ async function send(){
   C.step=4;C.out=OUT;C.msg=TM[Math.random()*TM.length|0];C.due=0;sv();render()}
 
 /* ---------- admin ---------- */
-let TP=0;function tap(){if(++TP>=5){TP=0;ap()}}
 function ap(){if(sessionStorage.adm==='1'){ADM=true;return render()}
   A.innerHTML=head()+`<div class="box"><h2>🔐 ورود به پنل مدیریت</h2><label>رمز</label><input id="pw" type="password" placeholder="رمز را وارد کن"><div id="er" class="warn"></div><button class="full" onclick="lg()">ورود</button><button class="g full" onclick="location.hash='';render()">بازگشت</button></div>`}
 function lg(){if($('#pw').value.trim()===PASS){ADM=true;try{sessionStorage.adm='1';localStorage.draft&&Object.assign(D,JSON.parse(localStorage.draft))}catch(x){}render()}else $('#er').textContent='رمز اشتباه است'}
