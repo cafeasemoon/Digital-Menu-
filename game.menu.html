@@ -59,11 +59,11 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
 <div id="bg"><svg preserveAspectRatio="xMidYMid slice"><defs><pattern id="pt" width="300" height="300" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)"><g fill="none" stroke="#8b3dff" stroke-width="2.2" stroke-linejoin="round" opacity=".42"><g transform="translate(20,30)"><path d="M30 20q-18 0-22 30l-6 40q-2 18 14 14l22-20h46l22 20q16 4 14-14l-6-40q-4-30-22-30z"/><path d="M36 48v22M25 59h22"/><circle cx="92" cy="50" r="5"/><circle cx="106" cy="62" r="5"/><circle cx="78" cy="62" r="5"/><circle cx="92" cy="74" r="5"/></g><g transform="translate(170,40)"><rect x="0" y="0" width="110" height="34" rx="9"/><path d="M12 17h40M80 17h18"/><circle cx="68" cy="17" r="4"/></g><g transform="translate(180,150)"><path d="M0 0h40l10 14h50v50H0z"/><circle cx="25" cy="38" r="9"/><path d="M60 30h28M60 44h28"/></g><g transform="translate(20,190)"><path d="M10 20q-10 0-10 12v30q0 12 10 12h30q10 0 10-12V32q0-12-10-12z"/><circle cx="25" cy="47" r="10"/><path d="M60 40h50"/></g></g></pattern></defs><rect width="100%" height="100%" fill="url(#pt)"/></svg></div>
 <div id="app"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
-<script id="data" type="application/json">{"shop":{"name":"گیم‌نت کسری","open":true,"reopen":"","phone":"09012113920","link":"https://claude.ai/artifact/CrAc87VYgaEBfbetFLf9nS"},"games":[{"id":"a1","n":"EA FC 25","g":"ورزشی","c":["PS4","PS5","Xbox One S","Xbox One X","Xbox Series S","Xbox Series X"],"s":60,"p":150000},{"id":"a2","n":"God of War Ragnarök","g":"اکشن","c":["PS4","PS5"],"s":90,"p":200000},{"id":"a3","n":"Forza Horizon 5","g":"مسابقه‌ای","c":["Xbox One S","Xbox One X","Xbox Series S","Xbox Series X"],"s":110,"p":180000},{"id":"a4","n":"Resident Evil 4","g":"ترسناک","c":["PS4","PS5","Xbox Series S","Xbox Series X"],"s":55,"p":170000},{"id":"a5","n":"Spider-Man 2","g":"ماجراجویی","c":["PS5"],"s":100,"p":220000}]}</script>
+<script id="data" type="application/json">{"shop":{"name":"گیم‌نت کسری","open":true,"reopen":"","phone":"09012113920"},"games":[{"id":"a1","n":"EA FC 25","g":"ورزشی","c":["PS4","PS5","Xbox One S","Xbox One X","Xbox Series S","Xbox Series X"],"s":60,"p":150000},{"id":"a2","n":"God of War Ragnarök","g":"اکشن","c":["PS4","PS5"],"s":90,"p":200000},{"id":"a3","n":"Forza Horizon 5","g":"مسابقه‌ای","c":["Xbox One S","Xbox One X","Xbox Series S","Xbox Series X"],"s":110,"p":180000},{"id":"a4","n":"Resident Evil 4","g":"ترسناک","c":["PS4","PS5","Xbox Series S","Xbox Series X"],"s":55,"p":170000},{"id":"a5","n":"Spider-Man 2","g":"ماجراجویی","c":["PS5"],"s":100,"p":220000}]}</script>
 <script>
 const $=s=>document.querySelector(s),A=$('#app');
 const D=JSON.parse($('#data').textContent);
-try{if(location.hash==='#kasra-panel'&&localStorage.draft)Object.assign(D,JSON.parse(localStorage.draft))}catch(x){}
+try{if((/^#(kasra-panel|admin|panel)$/.test(location.hash)||sessionStorage.adm==='1')&&localStorage.draft)Object.assign(D,JSON.parse(localStorage.draft))}catch(x){}
 const CN=['PS4','PS5','Xbox One S','Xbox One X','Xbox Series S','Xbox Series X'],GN=['اکشن','مسابقه‌ای','ورزشی','ماجراجویی','ترسناک'];
 const CP=[[500,'۵۰۰ گیگابایت'],[1000,'۱ ترابایت'],[2000,'۲ ترابایت']];
 const PASS='kasra developer 1355678896';
@@ -77,7 +77,7 @@ const sv=()=>{try{sessionStorage.c=JSON.stringify(C)}catch{}};
 const gm=()=>D.games.filter(g=>C.sel.includes(g.id)&&g.a!==false);
 const usable=()=>C.cap*.85;
 
-function head(){const o=D.shop.open;return `<header><h1>🎮 ${e(D.shop.name)}</h1><span class="tag ${o?'on':'off'}">${o?'باز است':'بسته است'}</span></header>`}
+function head(){const o=D.shop.open;return `<header><h1 onclick="tap()">🎮 ${e(D.shop.name)}</h1><span class="tag ${o?'on':'off'}">${o?'باز است':'بسته است'}</span></header>`}
 function render(){
   U();U=()=>{};
   if(ADM)return admin();
@@ -115,9 +115,10 @@ async function send(){
   C.step=4;C.out=OUT;C.msg=TM[Math.random()*TM.length|0];C.due=0;sv();render()}
 
 /* ---------- admin ---------- */
+let TP=0;function tap(){if(++TP>=5){TP=0;ap()}}
 function ap(){if(sessionStorage.adm==='1'){ADM=true;return render()}
   A.innerHTML=head()+`<div class="box"><h2>🔐 ورود به پنل مدیریت</h2><label>رمز</label><input id="pw" type="password" placeholder="رمز را وارد کن"><div id="er" class="warn"></div><button class="full" onclick="lg()">ورود</button><button class="g full" onclick="location.hash='';render()">بازگشت</button></div>`}
-function lg(){if($('#pw').value.trim()===PASS){ADM=true;try{sessionStorage.adm='1'}catch(x){}render()}else $('#er').textContent='رمز اشتباه است'}
+function lg(){if($('#pw').value.trim()===PASS){ADM=true;try{sessionStorage.adm='1';localStorage.draft&&Object.assign(D,JSON.parse(localStorage.draft))}catch(x){}render()}else $('#er').textContent='رمز اشتباه است'}
 function sd(){try{localStorage.draft=JSON.stringify(D)}catch(x){}render()}
 function col(){if($('#sn'))D.shop={name:$('#sn').value.trim()||'مغازه',open:$('#so').checked,reopen:$('#sr').value.trim(),phone:$('#sp').value.trim()}}
 function admin(){
@@ -142,7 +143,7 @@ function arm(){if(C.due)return;C.due=Date.now()+5000;sv();setTimeout(thx,5000)}
 function thx(){if(C.step!=4||!C.due||Date.now()<C.due-300||$('#thx'))return;const d=document.createElement('div');d.id='thx';d.style.cssText='position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;background:rgba(5,3,10,.97);overflow:auto';d.innerHTML=`<div style="font-size:3.4rem">💜</div><h2 style="color:var(--p2);font-size:1.5rem;text-shadow:0 0 18px var(--p)">ممنون ${e(C.name)} عزیز!</h2><p style="font-size:1.15rem;line-height:2;max-width:420px">${e(C.msg)}</p><button class="g" style="margin-top:18px" onclick="done()">سفارش جدید 🎮</button>`;document.body.appendChild(d)}
 function done(){C.step=3;C.sel=[];C.due=0;sv();const t=$('#thx');t&&t.remove();render()}
 document.addEventListener('visibilitychange',()=>{document.visibilityState==='visible'&&thx()});
-function route(){OUT=OUT||C.out||'';C.step==4&&C.due&&setTimeout(thx,Math.max(0,C.due-Date.now()));location.hash==='#kasra-panel'&&!ADM?ap():render()}
+function route(){OUT=OUT||C.out||'';C.step==4&&C.due&&setTimeout(thx,Math.max(0,C.due-Date.now()));/^#(kasra-panel|admin|panel)$/.test(location.hash)&&!ADM?ap():render()}
 addEventListener('hashchange',route);route();
 </script>
 </body>
